@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐯 Fortune Tiger - Jogue e Ganhe!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #1a0033 0%, #000000 100%);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            overflow-x: hidden;
+            color: white;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 0, 100, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 200, 0, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            animation: brilhoFundo 5s infinite alternate;
+        }
+
+        @keyframes brilhoFundo {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
+        }
+
+        .app {
+            max-width: 450px;
+            width: 100%;
+            background: linear-gradient(180deg, #2d0a4e 0%, #1a0029 100%);
+            border-radius: 24px;
+            padding: 20px;
+            border: 3px solid #ffcc00;
+            box-shadow: 
+                0 0 30px rgba(255, 204, 0, 0.5),
+                0 0 60px rgba(255, 0, 100, 0.3),
+                inset 0 0 40px rgba(255, 204, 0, 0.05);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(255, 204, 0, 0.3);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-emoji {
+            font-size: 2rem;
+            animation: tigrinhoPula 1s infinite alternate;
+            filter: drop-shadow(0 0 10px #ffcc00);
+        }
+
+        @keyframes tigrinhoPula {
+            from { transform: translateY(0) rotate(-5deg); }
+            to { transform: translateY(-5px) rotate(5deg); }
+        }
+
+        .logo-texto {
+            font-weight: 800;
+            font-size: 1.1rem;
+            background: linear-gradient(90deg, #ffcc00, #ff6600, #ffcc00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .saldo-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #00ff88;
+            border-radius: 12px;
+            padding: 6px 12px;
+            text-align: right;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .saldo-label {
+            font-size: 0.65rem;
+            color: #00ff88;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .saldo-valor {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+        }
+
+        /* Slot Machine */
+        .slot-machine {
+            background: linear-gradient(180deg, #4a0e78 0%, #2d0a4e 100%);
+            border-radius: 16px;
+            padding: 15px;
+            border: 3px solid #ffcc00;
+            box-shadow: 
+                inset 0 0 30px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(255, 204, 0, 0.3);
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .slot-machine::before {
+            content: '🐯 FORTUNE TIGER 🐯';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #ffcc00, #ff6600);
+            color: #1a0029;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 16px;
+            border-radius: 20px;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+
+        .reels {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            background: #000;
+            padding: 10px;
+            border-radius: 12px;
+            border: 2px solid #ffcc00;
+        }
+
+        .reel {
+            aspect-ratio: 1;
+            background: linear-gradient(180deg, #2d0a4e 0%, #1a0029 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            border: 2px solid rgba(255, 204, 0, 0.5);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.1s;
+        }
+
+        .reel.girando {
+            animation: girarReel 0.1s infinite;
+        }
+
+        @keyframes girarReel {
+            0% { transform: translateY(-5px); }
+            50% { transform: translateY(5px); }
+            100% { transform: translateY(-5px); }
+        }
+
+        .reel.ganhou {
+            animation: pulsarGanho 0.5s infinite alternate;
+            border-color: #00ff88;
+            box-shadow: inset 0 0 30px rgba(0, 255, 136, 0.5), 0 0 20px #00ff88;
+        }
+
+        @keyframes pulsarGanho {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
+        }
+
+        /* Mensagem */
+        .mensagem {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+            min-height: 50px;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px dashed rgba(255, 204, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            letter-spacing: 0.5px;
+        }
+
+        .mensagem.ganhou {
+            background: linear-gradient(90deg, rgba(0, 255, 136, 0.2), rgba(0, 255, 136, 0.4));
+            border-color: #00ff88;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+        }
+
+        .mensagem.perdeu {
+            background: linear-gradient(90deg, rgba(255, 0, 100, 0.2), rgba(255, 0, 100, 0.4));
+            border-color: #ff006e;
+            color: #ff6b9d;
+            text-shadow: 0 0 10px rgba(255, 0, 100, 0.6);
+        }
+
+        /* Botões */
+        .aposta-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 2px solid rgba(255, 204, 0, 0.3);
+        }
+
+        .aposta-label {
+            font-size: 0.75rem;
+            color: #ffcc00;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .aposta-valores {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .aposta-btn {
+            background: linear-gradient(180deg, #4a0e78, #2d0a4e);
+            border: 2px solid rgba(255, 204, 0, 0.5);
+            color: #ffcc00;
+            padding: 8px 4px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .aposta-btn:hover {
+            border-color: #ffcc00;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+
+        .aposta-btn.ativo {
+            background: linear-gradient(180deg, #ffcc00, #ff9900);
+            color: #1a0029;
+            border-color: #ffcc00;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.8);
+        }
+
+        .btn-girar {
+            width: 100%;
+            background: linear-gradient(180deg, #ff6600, #ff006e);
+            color: white;
+            border: 3px solid #ffcc00;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 1.3rem;
+            font-weight: 900;
+            cursor: pointer;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            box-shadow: 
+                0 6px 0 #85003a,
+                0 0 25px rgba(255, 102, 0, 0.6);
+            transition: all 0.1s;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-girar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: brilhoBotao 2s infinite;
+        }
+
+        @keyframes brilhoBotao {
+            from { transform: translateX(-100%) rotate(0deg); }
+            to { transform: translateX(100%) rotate(0deg); }
+        }
+
+        .btn-girar:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #85003a, 0 0 25px rgba(255, 102, 0, 0.6);
+        }
+
+        .btn-girar:disabled {
+            background: #444;
+            box-shadow: 0 6px 0 #222;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Rodapé zoeiro */
+        .rodape {
+            text-align: center;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+
+        .rodape .fake {
+            color: rgba(255, 0, 100, 0.6);
+            font-style: italic;
+        }
+
+        /* Modal de perdido tudo */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-overlay.ativo {
+            display: flex;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-box {
+            background: linear-gradient(180deg, #2d0a4e 0%, #1a0029 100%);
+            border: 4px solid #ff006e;
+            border-radius: 24px;
+            padding: 30px 24px;
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+            animation: entrarModal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 
+                0 0 50px rgba(255, 0, 100, 0.8),
+                inset 0 0 60px rgba(255, 0, 100, 0.1);
+            position: relative;
+        }
+
+        @keyframes entrarModal {
+            from { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+            to { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .modal-emoji {
+            font-size: 5rem;
+            display: block;
+            margin-bottom: 12px;
+            animation: tremer 0.3s infinite;
+        }
+
+        @keyframes tremer {
+            0%, 100% { transform: rotate(-8deg) scale(1); }
+            50% { transform: rotate(8deg) scale(1.1); }
+        }
+
+        .modal-titulo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #ff006e, #ffcc00, #ff006e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .modal-texto {
+            font-size: 1rem;
+            color: #fff;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .modal-texto strong {
+            color: #ffcc00;
+        }
+
+        .modal-lista {
+            background: rgba(255, 0, 100, 0.15);
+            border: 2px dashed #ff006e;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .modal-lista-item {
+            padding: 6px 0;
+            color: #ffcc00;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-lista-item::before {
+            content: '💸';
+        }
+
+        .modal-btn {
+            background: linear-gradient(180deg, #ff006e, #85003a);
+            color: white;
+            border: 3px solid #ffcc00;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: inherit;
+            box-shadow: 0 6px 0 #4a0020, 0 0 25px rgba(255, 0, 100, 0.6);
+            transition: all 0.1s;
+            margin: 4px;
+        }
+
+        .modal-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #4a0020, 0 0 25px rgba(255, 0, 100, 0.6);
+        }
+
+        .modal-btn.verde {
+            background: linear-gradient(180deg, #00ff88, #008844);
+            box-shadow: 0 6px 0 #004422, 0 0 25px rgba(0, 255, 136, 0.6);
+        }
+
+        .modal-btn.verde:active {
+            box-shadow: 0 2px 0 #004422, 0 0 25px rgba(0, 255, 136, 0.6);
+        }
+
+        /* Notificações flutuantes */
+        .notif {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #ffcc00;
+            padding: 12px 24px;
+            border-radius: 50px;
+            border: 2px solid #ffcc00;
+            font-weight: 700;
+            z-index: 2000;
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.6);
+            animation: notifEntra 0.4s ease-out, notifSai 0.4s ease-in 2.5s forwards;
+            font-size: 0.9rem;
+        }
+
+        @keyframes notifEntra {
+            from { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        @keyframes notifSai {
+            to { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+        }
+
+        /* Chuva de dinheiro */
+        .dinheiro {
+            position: fixed;
+            font-size: 2rem;
+            z-index: 999;
+            pointer-events: none;
+            animation: cairDinheiro 3s linear forwards;
+        }
+
+        @keyframes cairDinheiro {
+            0% {
+                opacity: 1;
+                transform: translateY(-100px) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(720deg);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .reel { font-size: 2.3rem; }
+            .btn-girar { font-size: 1.1rem; padding: 14px; }
+            .logo-texto { font-size: 0.95rem; }
+            .modal-titulo { font-size: 1.4rem; }
+            .modal-emoji { font-size: 3.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <span class="logo-emoji">🐯</span>
+                <span class="logo-texto">FORTUNE TIGER</span>
+            </div>
+            <div class="saldo-box">
+                <div class="saldo-label">Saldo</div>
+                <div class="saldo-valor" id="saldo">R$ 1.000</div>
+            </div>
+        </div>
+
+        <!-- Slot Machine -->
+        <div class="slot-machine">
+            <div class="reels">
+                <div class="reel" id="reel1">🐯</div>
+                <div class="reel" id="reel2">💰</div>
+                <div class="reel" id="reel3">🐯</div>
+            </div>
+        </div>
+
+        <!-- Mensagem -->
+        <div class="mensagem" id="mensagem">🎰 Escolha uma aposta e gire!</div>
+
+        <!-- Escolha da aposta -->
+        <div class="aposta-box">
+            <div class="aposta-label">💰 Valor da Aposta</div>
+            <div class="aposta-valores">
+                <button class="aposta-btn ativo" data-valor="50">R$ 50</button>
+                <button class="aposta-btn" data-valor="100">R$ 100</button>
+                <button class="aposta-btn" data-valor="250">R$ 250</button>
+                <button class="aposta-btn" data-valor="500">R$ 500</button>
+            </div>
+        </div>
+
+        <!-- Botão Girar -->
+        <button class="btn-girar" id="btnGirar">🎰 GIRAR 🎰</button>
+
+        <div class="rodape">
+            <span class="fake">*Jogo 100% confiável, confia no pai 😉</span><br>
+            Taxa de retorno: 99% (fonte: nossa própria imaginação)
+        </div>
+    </div>
+
+    <!-- Modal final -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <span class="modal-emoji">💀</span>
+            <h2 class="modal-titulo">VOCÊ PERDEU TUDO!</h2>
+            <p class="modal-texto" id="modalTexto">
+                Parabéns! Você conseguiu quebrar o banco... <strong>no sentido errado.</strong><br><br>
+                A casa sempre vence, meu amigo. E agora, como você vai pagar?
+            </p>
+            <div class="modal-lista">
+                <div class="modal-lista-item">Sua casa (hipotecada)</div>
+                <div class="modal-lista-item">Seu carro (vendido)</div>
+                <div class="modal-lista-item">O PS5 do seu irmão</div>
+                <div class="modal-lista-item" id="itemFamilia">Sua família (em negociação)</div>
+            </div>
+            <button class="modal-btn" id="btnVenderFamilia">VENDER A FAMÍLIA 😭</button>
+            <button class="modal-btn verde" id="btnResetar">JOGAR DE NOVO 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuração
+        const SIMBOLOS = ['🐯', '💰', '💎', '🍀', '⭐', '🎁', '7️⃣'];
+        const PREMIOS = {
+            '🐯': 5,
+            '💰': 3,
+            '💎': 10,
+            '🍀': 4,
+            '⭐': 2,
+            '🎁': 6,
+            '7️⃣': 20
+        };
+
+        // Estado
+        let saldo = 1000;
+        let apostaAtual = 50;
+        let girando = false;
+        let tentativas = 0;
+        let resetado = false;
+
+        // Elementos
+        const saldoEl = document.getElementById('saldo');
+        const mensagemEl = document.getElementById('mensagem');
+        const btnGirar = document.getElementById('btnGirar');
+        const reels = [
+            document.getElementById('reel1'),
+            document.getElementById('reel2'),
+            document.getElementById('reel3')
+        ];
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTexto = document.getElementById('modalTexto');
+        const btnVenderFamilia = document.getElementById('btnVenderFamilia');
+        const btnResetar = document.getElementById('btnResetar');
+        const apostaBtns = document.querySelectorAll('.aposta-btn');
+
+        // Atualiza saldo na tela
+        function atualizarSaldo() {
+            saldoEl.textContent = `R$ ${saldo.toLocaleString('pt-BR')}`;
+            
+            // Muda a cor do saldo conforme diminui
+            if (saldo <= 0) {
+                saldoEl.style.color = '#ff006e';
+                saldoEl.style.textShadow = '0 0 15px rgba(255, 0, 100, 0.8)';
+            } else if (saldo < 200) {
+                saldoEl.style.color = '#ffcc00';
+                saldoEl.style.textShadow = '0 0 10px rgba(255, 204, 0, 0.6)';
+            } else {
+                saldoEl.style.color = '#00ff88';
+                saldoEl.style.textShadow = '0 0 10px rgba(0, 255, 136, 0.6)';
+            }
+        }
+
+        // Seleciona aposta
+        apostaBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (girando) return;
+                apostaBtns.forEach(b => b.classList.remove('ativo'));
+                btn.classList.add('ativo');
+                apostaAtual = parseInt(btn.dataset.valor);
+            });
+        });
+
+        // Notificação flutuante
+        function notificar(texto) {
+            const notif = document.createElement('div');
+            notif.className = 'notif';
+            notif.textContent = texto;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        // Chuva de dinheiro (quando ganha)
+        function chuvaDinheiro() {
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'dinheiro';
+                    el.textContent = ['💰', '💵', '🪙', '💎'][Math.floor(Math.random() * 4)];
+                    el.style.left = Math.random() * 100 + '%';
+                    el.style.top = '-50px';
+                    el.style.fontSize = (Math.random() * 1.5 + 1.5) + 'rem';
+                    document.body.appendChild(el);
+                    setTimeout(() => el.remove(), 3000);
+                }, i * 100);
+            }
+        }
+
+        // Sorteia símbolo aleatório
+        function sortearSimbolo() {
+            return SIMBOLOS[Math.floor(Math.random() * SIMBOLOS.length)];
+        }
+
+        // Gira os reels
+        function girar() {
+            if (girando) return;
+            
+            if (saldo < apostaAtual) {
+                mensagemEl.textContent = '❌ Saldo insuficiente! Você precisa vender algo primeiro...';
+                mensagemEl.className = 'mensagem perdeu';
+                return;
+            }
+
+            girando = true;
+            tentativas++;
+            btnGirar.disabled = true;
+            btnGirar.textContent = '🎰 GIRANDO...';
+            mensagemEl.className = 'mensagem';
+            mensagemEl.textContent = '⏳ A sorte está sendo lançada...';
+
+            // Desconta aposta
+            saldo -= apostaAtual;
+            atualizarSaldo();
+
+            // Adiciona classe girando
+            reels.forEach(r => r.classList.add('girando'));
+
+            // Define resultados
+            const resultadoFinal = [sortearSimbolo(), sortearSimbolo(), sortearSimbolo()];
+
+            // Anima cada reel com delays diferentes
+            reels.forEach((reel, i) => {
+                let contador = 0;
+                const intervalo = setInterval(() => {
+                    reel.textContent = sortearSimbolo();
+                    contador++;
+                }, 80);
+
+                setTimeout(() => {
+                    clearInterval(intervalo);
+                    reel.textContent = resultadoFinal[i];
+                    reel.classList.remove('girando');
+                    
+                    // Último reel: processa resultado
+                    if (i === 2) {
+                        setTimeout(() => processarResultado(resultadoFinal), 300);
+                    }
+                }, 800 + i * 400);
+            });
+        }
+
+        // Processa o resultado do giro
+        function processarResultado(resultado) {
+            const [a, b, c] = resultado;
+            let ganhou = false;
+            let valorGanho = 0;
+
+            // Verifica combinações
+            if (a === b && b === c) {
+                // Três iguais - JACKPOT!
+                ganhou = true;
+                valorGanho = apostaAtual * PREMIOS[a] * 3;
+                reels.forEach(r => r.classList.add('ganhou'));
+                mensagemEl.textContent = `🎉 JACKPOT! Três ${a} iguais! Você ganhou R$ ${valorGanho.toLocaleString('pt-BR')}!`;
+                mensagemEl.className = 'mensagem ganhou';
+                chuvaDinheiro();
+                notificar(`🎊 JACKPOT! +R$ ${valorGanho.toLocaleString('pt-BR')}`);
+            } else if (a === b || b === c || a === c) {
+                // Dois iguais - Prêmio menor
+                ganhou = true;
+                const simboloIgual = (a === b) ? a : (b === c) ? b : a;
+                valorGanho = apostaAtual * Math.floor(PREMIOS[simboloIgual] / 2);
+                mensagemEl.textContent = `✨ Dois ${simboloIgual}! Você ganhou R$ ${valorGanho.toLocaleString('pt-BR')}!`;
+                mensagemEl.className = 'mensagem ganhou';
+                notificar(`💰 +R$ ${valorGanho.toLocaleString('pt-BR')}`);
+            } else {
+                // Perdeu
+                mensagemEl.textContent = `😢 Não foi dessa vez... Tente novamente!`;
+                mensagemEl.className = 'mensagem perdeu';
+            }
+
+            if (ganhou) {
+                saldo += valorGanho;
+                atualizarSaldo();
+                reels.forEach(r => {
+                    setTimeout(() => r.classList.remove('ganhou'), 2000);
+                });
+            }
+
+            girando = false;
+            btnGirar.disabled = false;
+            btnGirar.textContent = '🎰 GIRAR 🎰';
+
+            // Verifica se perdeu tudo (ou se está na 4ª tentativa e sem saldo)
+            verificarFimDeJogo();
+        }
+
+        // Verifica condições de fim de jogo
+        function verificarFimDeJogo() {
+            // Condição 1: Saldo zerado ou insuficiente
+            // Condição 2: 4ª tentativa (independente do saldo, para forçar a piada)
+            if ((saldo < 50) || (tentativas >= 4 && tentativas % 4 === 0)) {
+                // Pequeno delay para o usuário ver o resultado
+                setTimeout(() => {
+                    mostrarModalFinal();
+                }, 800);
+            }
+        }
+
+        // Mostra o modal final zoeiro
+        function mostrarModalFinal() {
+            // Personaliza mensagem conforme a situação
+            if (saldo <= 0) {
+                modalTexto.innerHTML = `
+                    Parabéns! Você conseguiu quebrar o banco... <strong>no sentido errado.</strong><br><br>
+                    A casa sempre vence, meu amigo. E agora, como você vai pagar?
+                `;
+            } else {
+                modalTexto.innerHTML = `
+                    Você apostou demais e agora está no <strong>prejuízo total!</strong><br><br>
+                    A sorte não estava do seu lado (e nem vai estar).<br>
+                    Hora de pagar a conta...
+                `;
+            }
+            
+            modalOverlay.classList.add('ativo');
+        }
+
+        // Botão vender família
+        btnVenderFamilia.addEventListener('click', () => {
+            const itemFamilia = document.getElementById('itemFamilia');
+            itemFamilia.innerHTML = 'Família vendida! ✅ (brincadeira... ou não)';
+            itemFamilia.style.color = '#00ff88';
+            itemFamilia.style.fontWeight = 'bold';
+            
+            notificar('😱 Família vendida! A zoeira não tem limites!');
+            
+            setTimeout(() => {
+                btnVenderFamilia.textContent = 'JÁ VENDI 😭 (mentira)';
+                btnVenderFamilia.disabled = true;
+                btnVenderFamilia.style.opacity = '0.5';
+            }, 500);
+        });
+
+        // Botão resetar
+        btnResetar.addEventListener('click', () => {
+            saldo = 1000;
+            tentativas = 0;
+            resetado = true;
+            atualizarSaldo();
+            
+            modalOverlay.classList.remove('ativo');
+            
+            // Reseta o modal
+            btnVenderFamilia.textContent = 'VENDER A FAMÍLIA 😭';
+            btnVenderFamilia.disabled = false;
+            btnVenderFamilia.style.opacity = '1';
+            const itemFamilia = document.getElementById('itemFamilia');
+            itemFamilia.innerHTML = 'Sua família (em negociação)';
+            itemFamilia.style.color = '#ffcc00';
+            itemFamilia.style.fontWeight = 'normal';
+            
+            mensagemEl.textContent = '🔄 Saldo resetado! Tente a sorte novamente!';
+            mensagemEl.className = 'mensagem';
+            
+            reels[0].textContent = '🐯';
+            reels[1].textContent = '💰';
+            reels[2].textContent = '🐯';
+            
+            notificar('💸 Saldo resetado para R$ 1.000!');
+        });
+
+        // Evento do botão girar
+        btnGirar.addEventListener('click', girar);
+
+        // Suporte a tecla espaço
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !girando && !modalOverlay.classList.contains('ativo')) {
+                e.preventDefault();
+                girar();
+            }
+        });
+
+        // Inicializa
+        atualizarSaldo();
+        
+        // Easter egg: ao abrir, mensagem zoeira
+        setTimeout(() => {
+            notificar('🐯 Bem-vindo ao Fortune Tiger! A casa SEMPRE ganha 😉');
+        }, 1000);
+    </script>
+</body>
+</html>
